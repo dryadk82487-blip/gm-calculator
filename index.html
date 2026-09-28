@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>毛利率速算</title>
 <meta name="description" content="售價變、成本變，毛利率怎麼算？毛利率（SGM）試算器、敏感度表與公式教學。">
@@ -121,6 +122,8 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
 .mnemonic .say{font-size:19px;font-weight:700}
 .mnemonic code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:.92em}
 .note{max-width:760px;font-size:14px;color:var(--ink-2)}
+.ft{border-top:1px solid var(--line);padding-top:20px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-3)}
+.ft a{color:var(--accent)}
 
 @media (max-width:760px){
   .calc{grid-template-columns:1fr}
@@ -149,7 +152,7 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
       <div class="inputs">
         <div class="field">
           <div class="field-top">
-            <label for="sgm">目前 SGM</label>
+            <label for="sgm">目前毛利率（SGM）</label>
             <div class="numbox"><input id="sgm" type="number" step="0.1" value="35"><span>%</span></div>
           </div>
           <input id="sgmR" type="range" min="0" max="90" step="0.5" value="35" aria-label="目前 SGM 滑桿">
@@ -275,6 +278,11 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
     </div>
     <p class="note">重點觀念：售價 +5% 不等於毛利率 +5 個百分點，因為成本沒跟著漲，必須用「毛利 ÷ 新售價」重算。售價變動改的是分母（除），成本變動改的是分子（乘）。</p>
   </section>
+
+  <footer class="ft">
+    <p>© 2026 黃俊霖. 本網站僅供個人參考與非商業用途，禁止未經授權之商業使用；如需商業使用請先聯繫作者取得授權。</p>
+    <p>聯絡信箱：<a href="mailto:dryadk82487@gmail.com">dryadk82487@gmail.com</a></p>
+  </footer>
 </div>
 
 <script>
