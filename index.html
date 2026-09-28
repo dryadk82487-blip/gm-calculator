@@ -122,6 +122,18 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
 .mnemonic .say{font-size:19px;font-weight:700}
 .mnemonic code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:.92em}
 .note{max-width:760px;font-size:14px;color:var(--ink-2)}
+.note code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:.92em}
+.coef{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink-2)}
+.coef code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:.92em}
+.examples{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.exc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:10px}
+.exc .tag{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.exc p{font-size:13px}
+.exc ol{margin:0;padding-left:1.4em;font-family:var(--mono);font-size:13px;display:flex;flex-direction:column;gap:2px}
+.exc .res{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+.exc .res b{font-family:var(--mono);font-size:26px;line-height:1.1}
+.exc .res small{font-size:12px;color:var(--ink-3)}
+@media (max-width:760px){.examples{grid-template-columns:1fr}}
 .ft{border-top:1px solid var(--line);padding-top:20px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-3)}
 .ft a{color:var(--accent)}
 
@@ -272,14 +284,52 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
     </div>
 
     <div class="mnemonic">
-      <span class="eyebrow">口訣</span>
-      <p class="say">① 成本率 = 1 − SGM　② 售價變就 ÷ 售價係數，成本變就 × 成本係數　③ 新 SGM = 1 − 上一步的結果</p>
-      <p class="muted">係數 = 1 + 變動幅度：漲 5% 用 <code>1.05</code>、跌 1% 用 <code>0.99</code>、沒變就是 <code>1</code>。百分比請換成小數再算（35% → <code>0.35</code>）。</p>
-      <p class="muted">例：SGM 35%、售價 +5% → ① 1 − 0.35 = 0.65　② 0.65 ÷ 1.05 = 0.619　③ 1 − 0.619 = <b>38.10%</b></p>
-      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數。只變售價 +10% → 1 − 0.65 ÷ 1.10 = 40.91%；只變售價 −1% → 1 − 0.65 ÷ 0.99 = 34.34%。</p>
-      <p class="muted">成本範例：SGM 35%、成本 +5%、售價不變 → ① 1 − 0.35 = 0.65　② 0.65 × 1.05 = 0.6825　③ 0.6825 ÷ 1 = 0.6825　④ 1 − 0.6825 = <b>31.75%</b>（驗算：成本 68.25、售價 100，毛利 31.75 ÷ 100）</p>
-      <p class="muted">⚠️ 先把乘除算完，最後才用 1 去減。計算機若從左按到右，會算成 (1 − 0.65) × 1.05 = 36.75% ❌。Excel 直接打 <code>=1-(1-0.35)*1.05/1</code> 最保險。</p>
+      <span class="eyebrow">通用公式</span>
+      <p class="say">新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數</p>
+      <ul class="coef">
+        <li><b>成本係數</b> = 1 + 成本變動幅度。成本漲 5% 用 <code>1.05</code>、降 3% 用 <code>0.97</code>、沒變就是 <code>1</code>。</li>
+        <li><b>售價係數</b> = 1 + 售價變動幅度。售價漲 5% 用 <code>1.05</code>、降 1% 用 <code>0.99</code>、沒變就是 <code>1</code>。</li>
+        <li>百分比先換成小數再算：原 SGM 35% → <code>0.35</code>。</li>
+      </ul>
     </div>
+
+    <div class="examples">
+      <article class="exc">
+        <span class="tag">範例 1 · 成本 +5%、售價不動</span>
+        <p class="muted">成本係數 1.05、售價係數 1</p>
+        <ol>
+          <li>1 − 0.35 = 0.65</li>
+          <li>0.65 × 1.05 = 0.6825</li>
+          <li>0.6825 ÷ 1 = 0.6825</li>
+          <li>1 − 0.6825 = <b>0.3175</b></li>
+        </ol>
+        <div class="res"><b style="color:var(--down)">31.75%</b><small>驗算：成本 68.25、售價 100，毛利 31.75 ÷ 100</small></div>
+      </article>
+      <article class="exc">
+        <span class="tag">範例 2 · 售價 +5%、成本不動</span>
+        <p class="muted">成本係數 1、售價係數 1.05</p>
+        <ol>
+          <li>1 − 0.35 = 0.65</li>
+          <li>0.65 × 1 = 0.65</li>
+          <li>0.65 ÷ 1.05 = 0.6190</li>
+          <li>1 − 0.6190 = <b>0.3810</b></li>
+        </ol>
+        <div class="res"><b style="color:var(--up)">38.10%</b><small>驗算：成本 65、售價 105，毛利 40 ÷ 105</small></div>
+      </article>
+      <article class="exc">
+        <span class="tag">範例 3 · 售價、成本都 +5%</span>
+        <p class="muted">成本係數 1.05、售價係數 1.05</p>
+        <ol>
+          <li>1 − 0.35 = 0.65</li>
+          <li>0.65 × 1.05 = 0.6825</li>
+          <li>0.6825 ÷ 1.05 = 0.65</li>
+          <li>1 − 0.65 = <b>0.35</b></li>
+        </ol>
+        <div class="res"><b>35.00%</b><small>驗算：成本 68.25、售價 105，毛利 36.75 ÷ 105（等幅調整，毛利率不變）</small></div>
+      </article>
+    </div>
+
+    <p class="note">⚠️ 先把乘除算完，最後才用 1 去減。計算機若從左按到右，會算成 (1 − 0.65) × 1.05 = 36.75% ❌。Excel 直接打 <code>=1-(1-0.35)*1.05/1</code> 最保險。</p>
     <p class="note">重點觀念：售價 +5% 不等於毛利率 +5 個百分點，因為成本沒跟著漲，必須用「毛利 ÷ 新售價」重算。售價變動改的是分母（除），成本變動改的是分子（乘）。</p>
   </section>
 
