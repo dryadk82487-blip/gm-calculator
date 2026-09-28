@@ -87,9 +87,6 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .steps{font-family:var(--mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;overflow-x:auto}
 .steps .s{white-space:nowrap}
 .steps .k{color:var(--ink-3)}
-.target{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:14px;padding-top:4px;border-top:1px dashed var(--line)}
-.target .numbox input{width:70px;font-size:15px}
-.target strong{font-family:var(--mono)}
 @media (prefers-reduced-motion:reduce){.bar .c,.bar .p{transition:none}}
 
 .tablehead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
@@ -215,13 +212,6 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
         </div>
 
         <div class="steps" id="steps"></div>
-
-        <div class="target">
-          <span>想守住 SGM</span>
-          <div class="numbox"><input id="tgt" type="number" step="0.1" value="35" aria-label="目標 SGM"><span>%</span></div>
-          <span>在這個成本變動下，售價要調</span>
-          <strong id="need">+5.00%</strong>
-        </div>
       </div>
     </div>
   </section>
@@ -345,7 +335,6 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
   const S={sgm:35,cost:5,price:0};
   const pairs=[['sgm','sgmR'],['cost','costR'],['price','priceR']];
   const f2=x=>(Math.round(x*100)/100).toFixed(2);
-  const sign=x=>(x>0?'+':x<0?'−':'')+f2(Math.abs(x));
   const calc=(sgm,c,p)=>1-(1-sgm/100)*(1+c/100)/(1+p/100);
 
   function bar(el,cost,price,mx){
@@ -373,11 +362,6 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
       '<div class="s"><span class="k">② × 成本係數</span>  '+f2(cost0)+'% × '+cf+' = '+f2(cost0*(1+c/100))+'%</div>'+
       '<div class="s"><span class="k">③ ÷ 售價係數</span>  '+f2(cost1)+'% ÷ '+pf+' = '+f2(cost1/(1+p/100))+'%</div>'+
       '<div class="s"><span class="k">④ 新 SGM</span>     1 − '+f2(cost1/(1+p/100))+'% = <b>'+f2(n)+'%</b></div>';
-    const t=parseFloat($('tgt').value);
-    if(isFinite(t)&&t<100){
-      const need=((1-sgm/100)*(1+c/100)/(1-t/100)-1)*100;
-      $('need').textContent=sign(need)+'%';
-    } else $('need').textContent='—';
     table();
   }
 
@@ -413,7 +397,6 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
     $(a).addEventListener('input',e=>{const v=parseFloat(e.target.value); if(isFinite(v)){S[a]=v;$(b).value=v;render();}});
     $(b).addEventListener('input',e=>{set(a,e.target.value);$(a).value=e.target.value;});
   });
-  $('tgt').addEventListener('input',render);
   function apply(p,c,sgm){ if(sgm!=null){set('sgm',sgm);$('sgm').value=sgm;} set('price',p);$('price').value=p; set('cost',c);$('cost').value=c; }
   document.querySelectorAll('[data-p]').forEach(b=>{ if(b.tagName==='BUTTON') b.addEventListener('click',()=>{
     apply(+b.dataset.p,+b.dataset.c,35);
