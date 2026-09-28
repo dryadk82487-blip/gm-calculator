@@ -273,8 +273,10 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
 
     <div class="mnemonic">
       <span class="eyebrow">口訣</span>
-      <p class="say">先換成成本率（1 − SGM）→ 售價變就除以售價係數、成本變就乘上成本係數 → 最後用 1 減回來。</p>
-      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數。例：只變售價 +10%，成本係數 <code>1</code>、售價係數 <code>1.10</code> → 40.91%；只變售價 −1%，售價係數 <code>0.99</code> → 34.34%。</p>
+      <p class="say">① 成本率 = 1 − SGM　② 售價變就 ÷ 售價係數，成本變就 × 成本係數　③ 新 SGM = 1 − 上一步的結果</p>
+      <p class="muted">係數 = 1 + 變動幅度：漲 5% 用 <code>1.05</code>、跌 1% 用 <code>0.99</code>、沒變就是 <code>1</code>。百分比請換成小數再算（35% → <code>0.35</code>）。</p>
+      <p class="muted">例：SGM 35%、售價 +5% → ① 1 − 0.35 = 0.65　② 0.65 ÷ 1.05 = 0.619　③ 1 − 0.619 = <b>38.10%</b></p>
+      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數。只變售價 +10% → 1 − 0.65 ÷ 1.10 = 40.91%；只變售價 −1% → 1 − 0.65 ÷ 0.99 = 34.34%。</p>
     </div>
     <p class="note">重點觀念：售價 +5% 不等於毛利率 +5 個百分點，因為成本沒跟著漲，必須用「毛利 ÷ 新售價」重算。售價變動改的是分母（除），成本變動改的是分子（乘）。</p>
   </section>
