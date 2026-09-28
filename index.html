@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>毛利率速算</title>
+<meta name="description" content="售價變、成本變，毛利率怎麼算？毛利率（SGM）試算器、敏感度表與公式教學。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#e9edf3; --ink:#18202c; --ink-2:#4a5566; --ink-3:#7b8596;
+  --line:#d5dbe4; --accent:#2346a8; --accent-soft:#e2e8f8;
+  --up:#c8322a; --up-soft:#fbe6e4; --down:#16804a; --down-soft:#e0f2e8;
+  --cost:#9aa6b8; --profit:#2346a8;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10141b; --surface:#171d27; --surface-2:#1f2733; --ink:#e7ebf1; --ink-2:#aab3c2; --ink-3:#7a8597;
+    --line:#2b3442; --accent:#8aa6ff; --accent-soft:#1f2a4a;
+    --up:#ff6b61; --up-soft:#3a1c1b; --down:#4cc486; --down-soft:#15301f;
+    --cost:#4a5566; --profit:#8aa6ff;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10141b; --surface:#171d27; --surface-2:#1f2733; --ink:#e7ebf1; --ink-2:#aab3c2; --ink-3:#7a8597;
+  --line:#2b3442; --accent:#8aa6ff; --accent-soft:#1f2a4a;
+  --up:#ff6b61; --up-soft:#3a1c1b; --down:#4cc486; --down-soft:#15301f;
+  --cost:#4a5566; --profit:#8aa6ff;
+}
+*{box-sizing:border-box}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;padding:0 16px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:900;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--ink-3);font-weight:500}
+.muted{color:var(--ink-2)}
+
+header{display:flex;flex-direction:column;gap:14px}
+.formula-bar{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline;padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.formula-bar .big{font-family:var(--mono);font-size:clamp(17px,2.4vw,22px);font-weight:600;color:var(--accent)}
+
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.inputs{padding:24px;display:flex;flex-direction:column;gap:22px;border-right:1px solid var(--line)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.field label{font-weight:700;font-size:15px}
+.field .hint{font-size:12px;color:var(--ink-3)}
+.numbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.numbox input{width:92px;border:0;background:transparent;color:var(--ink);font-family:var(--mono);font-size:18px;font-weight:600;text-align:right;padding:6px 4px 6px 10px;outline:none}
+.numbox span{padding:0 10px 0 2px;color:var(--ink-3);font-family:var(--mono)}
+.numbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);border-radius:999px;padding:4px 12px;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.reset{align-self:flex-start}
+
+.result{padding:24px;display:flex;flex-direction:column;gap:20px;background:var(--surface-2)}
+.headline{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 28px}
+.headline .lbl{font-size:13px;color:var(--ink-2)}
+.newsgm{font-family:var(--mono);font-size:clamp(44px,7vw,64px);font-weight:600;line-height:1;letter-spacing:-.02em}
+.delta{font-family:var(--mono);font-size:18px;font-weight:600;padding:4px 10px;border-radius:6px;display:inline-block}
+.delta.up{color:var(--up);background:var(--up-soft)}
+.delta.down{color:var(--down);background:var(--down-soft)}
+.delta.flat{color:var(--ink-2);background:var(--surface)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;font-size:13px}
+.bar{position:relative;height:30px;border-radius:6px;background:var(--surface);overflow:hidden;display:flex}
+.bar .c{background:var(--cost);height:100%;display:flex;align-items:center;padding-left:8px;color:var(--ink);font-family:var(--mono);font-size:12px;white-space:nowrap;overflow:hidden;transition:width .25s}
+.bar .p{background:var(--profit);height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:var(--surface);font-family:var(--mono);font-size:12px;white-space:nowrap;overflow:hidden;transition:width .25s}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink-3)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.steps{font-family:var(--mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+.steps .s{white-space:nowrap}
+.steps .k{color:var(--ink-3)}
+.target{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:14px;padding-top:4px;border-top:1px dashed var(--line)}
+.target .numbox input{width:70px;font-size:15px}
+.target strong{font-family:var(--mono)}
+@media (prefers-reduced-motion:reduce){.bar .c,.bar .p{transition:none}}
+
+.tablehead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+thead th{font-weight:500;color:var(--ink-2);background:var(--surface-2)}
+tbody th{font-weight:500;color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
+.corner{font-family:var(--sans);font-size:11px;line-height:1.3;color:var(--ink-3)}
+td{cursor:pointer}
+td:hover{outline:1px solid var(--accent);outline-offset:-1px}
+td.cur{outline:2px solid var(--accent);outline-offset:-2px;font-weight:600}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+
+.lessons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.lesson{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:22px;display:flex;flex-direction:column;gap:14px}
+.lesson .tag{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.lesson .rule{font-size:14px;color:var(--ink-2)}
+.lesson .f{font-family:var(--mono);font-size:16px;font-weight:600;background:var(--accent-soft);color:var(--ink);padding:10px 12px;border-radius:8px}
+.lesson ol{margin:0;padding-left:1.4em;font-size:14px;display:flex;flex-direction:column;gap:2px}
+.lesson ol li{font-family:var(--mono);font-size:13px}
+.lesson .ex{display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;border-top:1px solid var(--line);padding-top:12px}
+.lesson .ex p{font-size:13.5px;color:var(--ink-2)}
+.lesson .ans{grid-row:span 2;text-align:right}
+.lesson .ans b{display:block;font-family:var(--mono);font-size:28px;line-height:1.1}
+.lesson .ans small{font-size:12px;color:var(--ink-3)}
+.try{font:inherit;font-size:13px;border:0;background:none;color:var(--accent);padding:0;cursor:pointer;align-self:flex-start;text-decoration:underline;text-underline-offset:3px}
+
+.mnemonic{border-left:3px solid var(--accent);padding:4px 0 4px 18px;display:flex;flex-direction:column;gap:10px;max-width:760px}
+.mnemonic .say{font-size:19px;font-weight:700}
+.mnemonic code{font-family:var(--mono);background:var(--surface-2);padding:1px 6px;border-radius:4px;font-size:.92em}
+.note{max-width:760px;font-size:14px;color:var(--ink-2)}
+
+@media (max-width:760px){
+  .calc{grid-template-columns:1fr}
+  .inputs{border-right:0;border-bottom:1px solid var(--line)}
+  .lessons{grid-template-columns:1fr}
+  .inputs,.result{padding:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">GROSS MARGIN · 快速試算</span>
+    <h1>售價變、成本變，毛利率怎麼算？</h1>
+    <p class="muted">售價漲 5%，毛利率不會多 5 個百分點。成本沒跟著漲，要拿「毛利 ÷ 新售價」重算。下面的試算器會把新的 SGM 和每一步算式直接列出來。</p>
+    <div class="formula-bar">
+      <span class="big">SGM = 1 − Cost ÷ Price</span>
+      <span class="muted" style="font-size:14px">通用：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數</span>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:14px" aria-labelledby="calc-h">
+    <h2 id="calc-h">試算器</h2>
+    <div class="calc">
+      <div class="inputs">
+        <div class="field">
+          <div class="field-top">
+            <label for="sgm">目前 SGM</label>
+            <div class="numbox"><input id="sgm" type="number" step="0.1" value="35"><span>%</span></div>
+          </div>
+          <input id="sgmR" type="range" min="0" max="90" step="0.5" value="35" aria-label="目前 SGM 滑桿">
+        </div>
+        <div class="field">
+          <div class="field-top">
+            <div><label for="cost">成本變動</label><div class="hint">原料、代工價上漲填正數</div></div>
+            <div class="numbox"><input id="cost" type="number" step="0.1" value="5"><span>%</span></div>
+          </div>
+          <input id="costR" type="range" min="-30" max="30" step="0.5" value="5" aria-label="成本變動滑桿">
+        </div>
+        <div class="field">
+          <div class="field-top">
+            <div><label for="price">售價變動</label><div class="hint">漲價填正數、降價填負數</div></div>
+            <div class="numbox"><input id="price" type="number" step="0.1" value="0"><span>%</span></div>
+          </div>
+          <input id="priceR" type="range" min="-30" max="30" step="0.5" value="0" aria-label="售價變動滑桿">
+        </div>
+        <div class="field">
+          <span class="hint">教材範例（原 SGM 35%）</span>
+          <div class="presets">
+            <button class="chip" data-p="5" data-c="0">售價 +5%</button>
+            <button class="chip" data-p="0" data-c="5">成本 +5%</button>
+            <button class="chip" data-p="10" data-c="0">售價 +10%</button>
+            <button class="chip" data-p="-1" data-c="0">售價 −1%</button>
+            <button class="chip" data-p="5" data-c="5">兩者都 +5%</button>
+          </div>
+        </div>
+        <button class="chip reset" id="reset">歸零變動</button>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="headline">
+          <div>
+            <div class="lbl">新 SGM</div>
+            <div class="newsgm" id="out">31.75%</div>
+          </div>
+          <div>
+            <div class="lbl">相較原本</div>
+            <span class="delta down" id="delta">▼ 3.25 pp</span>
+          </div>
+        </div>
+
+        <div class="bars">
+          <div class="legend"><span><i style="background:var(--cost)"></i>成本</span><span><i style="background:var(--profit)"></i>毛利</span><span>以原售價 100 為基準</span></div>
+          <div class="barrow"><span class="muted">變動前</span><div class="bar" id="barA"></div></div>
+          <div class="barrow"><span class="muted">變動後</span><div class="bar" id="barB"></div></div>
+        </div>
+
+        <div class="steps" id="steps"></div>
+
+        <div class="target">
+          <span>想守住 SGM</span>
+          <div class="numbox"><input id="tgt" type="number" step="0.1" value="35" aria-label="目標 SGM"><span>%</span></div>
+          <span>在這個成本變動下，售價要調</span>
+          <strong id="need">+5.00%</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:14px" aria-labelledby="tbl-h">
+    <div class="tablehead">
+      <div>
+        <h2 id="tbl-h">敏感度表</h2>
+        <p class="muted" style="font-size:14px">以目前 SGM <b class="mono" id="tblBase">35.0%</b> 為基準。點任一格可帶回試算器。</p>
+      </div>
+      <div class="legend"><span><i style="background:var(--up)"></i>毛利率上升</span><span><i style="background:var(--down)"></i>毛利率下降</span><span>台股紅漲綠跌</span></div>
+    </div>
+    <div class="scroll"><table id="tbl"></table></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:18px" aria-labelledby="lesson-h">
+    <div>
+      <h2 id="lesson-h">教材重點</h2>
+      <p class="muted" style="font-size:14px">範例都用原毛利率 35%（售價 100、成本 65）。</p>
+    </div>
+    <div class="lessons">
+      <article class="lesson">
+        <span class="tag">情境一 · 售價 +5%（成本不動）</span>
+        <p class="rule">價格變大，是「分母」變了，所以要<b>除以</b>。</p>
+        <div class="f">新 SGM = (原 SGM + 5%) ÷ (1 + 5%)</div>
+        <div>
+          <h3 style="font-size:14px;margin-bottom:4px">推導</h3>
+          <ol>
+            <li>原本 Cost ÷ Price = 1 − SGM</li>
+            <li>新 SGM = 1 − Cost ÷ (Price × 1.05) = 1 − (1 − SGM) ÷ 1.05</li>
+            <li>整理後 = (SGM + 0.05) ÷ 1.05</li>
+          </ol>
+        </div>
+        <div class="ex">
+          <p>帶入：(35% + 5%) ÷ 105% = 40 ÷ 105</p>
+          <div class="ans"><b style="color:var(--up)">38.10%</b><small>不是 40%</small></div>
+          <p>驗算：售價 105、成本 65，40 ÷ 105</p>
+        </div>
+        <button class="try" data-p="5" data-c="0">在試算器打開這個例子</button>
+      </article>
+      <article class="lesson">
+        <span class="tag">情境二 · 成本 +5%（售價不動）</span>
+        <p class="rule">成本變大，是「分子」變了，所以要<b>乘上</b>。</p>
+        <div class="f">新 SGM = 原 SGM × (1 + 5%) − 5%</div>
+        <div>
+          <h3 style="font-size:14px;margin-bottom:4px">推導</h3>
+          <ol>
+            <li>原本 Cost ÷ Price = 1 − SGM</li>
+            <li>新 SGM = 1 − (Cost × 1.05) ÷ Price = 1 − (1 − SGM) × 1.05</li>
+            <li>展開後 = SGM × 1.05 − 0.05</li>
+          </ol>
+        </div>
+        <div class="ex">
+          <p>帶入：35% × 1.05 − 5% = 36.75% − 5%</p>
+          <div class="ans"><b style="color:var(--down)">31.75%</b><small>掉 3.25 個百分點</small></div>
+          <p>驗算：成本 68.25、售價 100，31.75 ÷ 100</p>
+        </div>
+        <button class="try" data-p="0" data-c="5">在試算器打開這個例子</button>
+      </article>
+    </div>
+
+    <div class="mnemonic">
+      <span class="eyebrow">口訣</span>
+      <p class="say">售價變 → 除以 (1 + 變動)；成本變 → 乘上 (1 + 變動)。</p>
+      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) ÷ 售價係數。例：售價 +10% 用 <code>1.10</code> → 40.91%；售價 −1% 用 <code>0.99</code> → 34.34%。</p>
+    </div>
+    <p class="note">重點觀念：售價 +5% 不等於毛利率 +5 個百分點，因為成本沒跟著漲，必須用「毛利 ÷ 新售價」重算。售價變動改的是分母（除），成本變動改的是分子（乘）。</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const S={sgm:35,cost:5,price:0};
+  const pairs=[['sgm','sgmR'],['cost','costR'],['price','priceR']];
+  const f2=x=>(Math.round(x*100)/100).toFixed(2);
+  const sign=x=>(x>0?'+':x<0?'−':'')+f2(Math.abs(x));
+  const calc=(sgm,c,p)=>1-(1-sgm/100)*(1+c/100)/(1+p/100);
+
+  function bar(el,cost,price,mx){
+    const w=v=>Math.max(0,v)/mx*100;
+    const profit=price-cost;
+    el.innerHTML='<div class="c" style="width:'+w(Math.min(cost,price))+'%">成本 '+f2(cost)+'</div>'+
+      '<div class="p" style="width:'+w(profit)+'%">'+(profit>=0?'毛利 '+f2(profit):'')+'</div>';
+    if(profit<0) el.querySelector('.c').textContent='成本 '+f2(cost)+'（虧損 '+f2(-profit)+'）';
+  }
+
+  function render(){
+    const {sgm,cost:c,price:p}=S;
+    const valid=p>-100 && isFinite(sgm)&&isFinite(c)&&isFinite(p);
+    if(!valid){$('out').textContent='—';$('steps').innerHTML='<span>售價變動需大於 −100%</span>';return;}
+    const n=calc(sgm,c,p)*100, d=n-sgm;
+    $('out').textContent=f2(n)+'%';
+    const dl=$('delta');
+    dl.className='delta '+(Math.abs(d)<0.005?'flat':d>0?'up':'down');
+    dl.textContent=(Math.abs(d)<0.005?'持平 ':d>0?'▲ ':'▼ ')+f2(Math.abs(d))+' pp';
+    const cost0=100-sgm, cost1=cost0*(1+c/100), price1=100*(1+p/100);
+    const mx=Math.max(100,cost0,cost1,price1); bar($('barA'),cost0,100,mx); bar($('barB'),cost1,price1,mx);
+    const cf=(1+c/100).toFixed(4).replace(/0+$/,'').replace(/\.$/,''), pf=(1+p/100).toFixed(4).replace(/0+$/,'').replace(/\.$/,'');
+    $('steps').innerHTML=
+      '<div class="s"><span class="k">① 成本占售價</span>  1 − '+f2(sgm)+'% = '+f2(cost0)+'%</div>'+
+      '<div class="s"><span class="k">② × 成本係數</span>  '+f2(cost0)+'% × '+cf+' = '+f2(cost0*(1+c/100))+'%</div>'+
+      '<div class="s"><span class="k">③ ÷ 售價係數</span>  '+f2(cost1)+'% ÷ '+pf+' = '+f2(cost1/(1+p/100))+'%</div>'+
+      '<div class="s"><span class="k">④ 新 SGM</span>     1 − '+f2(cost1/(1+p/100))+'% = <b>'+f2(n)+'%</b></div>';
+    const t=parseFloat($('tgt').value);
+    if(isFinite(t)&&t<100){
+      const need=((1-sgm/100)*(1+c/100)/(1-t/100)-1)*100;
+      $('need').textContent=sign(need)+'%';
+    } else $('need').textContent='—';
+    table();
+  }
+
+  const P=[-10,-5,-3,-1,0,1,3,5,10], C=[-10,-5,-3,-1,0,1,3,5,10];
+  function table(){
+    const sgm=S.sgm;
+    $('tblBase').textContent=sgm.toFixed(1)+'%';
+    let h='<thead><tr><th class="corner">成本↓ ／ 售價→</th>'+P.map(p=>'<th>'+(p>0?'+':p<0?'−':'')+Math.abs(p)+'%</th>').join('')+'</tr></thead><tbody>';
+    for(const c of C){
+      h+='<tr><th>'+(c>0?'+':c<0?'−':'')+Math.abs(c)+'%</th>';
+      for(const p of P){
+        const n=calc(sgm,c,p)*100, d=n-sgm;
+        const a=Math.min(Math.abs(d)/12,1)*0.55+ (Math.abs(d)>0.005?0.08:0);
+        const col=d>0?'var(--up)':'var(--down)';
+        const bg=Math.abs(d)<0.005?'':'background:color-mix(in srgb,'+col+' '+Math.round(a*100)+'%,transparent);';
+        const cur=(c===S.cost&&p===S.price)?' cur':'';
+        h+='<td class="'+cur+'" style="'+bg+'" data-c="'+c+'" data-p="'+p+'" title="成本 '+c+'%、售價 '+p+'%">'+f2(n)+'</td>';
+      }
+      h+='</tr>';
+    }
+    $('tbl').innerHTML=h+'</tbody>';
+  }
+
+  function set(k,v){
+    v=parseFloat(v); if(!isFinite(v)) return;
+    S[k]=v;
+    const [a,b]=pairs.find(x=>x[0]===k);
+    if(document.activeElement!==$(a)) $(a).value=v;
+    $(b).value=v;
+    render();
+  }
+  pairs.forEach(([a,b])=>{
+    $(a).addEventListener('input',e=>{const v=parseFloat(e.target.value); if(isFinite(v)){S[a]=v;$(b).value=v;render();}});
+    $(b).addEventListener('input',e=>{set(a,e.target.value);$(a).value=e.target.value;});
+  });
+  $('tgt').addEventListener('input',render);
+  function apply(p,c,sgm){ if(sgm!=null){set('sgm',sgm);$('sgm').value=sgm;} set('price',p);$('price').value=p; set('cost',c);$('cost').value=c; }
+  document.querySelectorAll('[data-p]').forEach(b=>{ if(b.tagName==='BUTTON') b.addEventListener('click',()=>{
+    apply(+b.dataset.p,+b.dataset.c,35);
+    if(b.classList.contains('try')) $('calc-h').scrollIntoView({behavior:'smooth',block:'start'});
+  });});
+  $('tbl').addEventListener('click',e=>{const td=e.target.closest('td'); if(td) apply(+td.dataset.p,+td.dataset.c);});
+  $('reset').addEventListener('click',()=>apply(0,0));
+  render();
+})();
+</script>
+
+</body>
+</html>
