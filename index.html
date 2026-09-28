@@ -136,7 +136,7 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
   <header>
     <span class="eyebrow">GROSS MARGIN · 快速試算</span>
     <h1>售價變、成本變，毛利率怎麼算？</h1>
-    <p class="muted">售價漲 5%，毛利率不會多 5 個百分點。成本沒跟著漲，要拿「毛利 ÷ 新售價」重算。下面的試算器會把新的 SGM 和每一步算式直接列出來。</p>
+    <p class="muted">售價漲 5%，毛利率不會多 5 個百分點。成本沒跟著漲，要拿「毛利 ÷ 新售價」重算。下面的試算器會把新的毛利率（SGM，Gross Margin）和每一步算式直接列出來。</p>
     <div class="formula-bar">
       <span class="big">SGM = 1 − Cost ÷ Price</span>
       <span class="muted" style="font-size:14px">通用：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數</span>
@@ -217,7 +217,7 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
         <h2 id="tbl-h">敏感度表</h2>
         <p class="muted" style="font-size:14px">以目前 SGM <b class="mono" id="tblBase">35.0%</b> 為基準。點任一格可帶回試算器。</p>
       </div>
-      <div class="legend"><span><i style="background:var(--up)"></i>毛利率上升</span><span><i style="background:var(--down)"></i>毛利率下降</span><span>台股紅漲綠跌</span></div>
+      <div class="legend"><span><i style="background:var(--up)"></i>毛利率上升</span><span><i style="background:var(--down)"></i>毛利率下降</span><span>紅＝上升、綠＝下降（台灣慣例）</span></div>
     </div>
     <div class="scroll"><table id="tbl"></table></div>
   </section>
@@ -270,8 +270,8 @@ tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
 
     <div class="mnemonic">
       <span class="eyebrow">口訣</span>
-      <p class="say">售價變 → 除以 (1 + 變動)；成本變 → 乘上 (1 + 變動)。</p>
-      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) ÷ 售價係數。例：售價 +10% 用 <code>1.10</code> → 40.91%；售價 −1% 用 <code>0.99</code> → 34.34%。</p>
+      <p class="say">先換成成本率（1 − SGM）→ 售價變就除以售價係數、成本變就乘上成本係數 → 最後用 1 減回來。</p>
+      <p class="muted">通用公式：新 SGM = 1 − (1 − 原 SGM) × 成本係數 ÷ 售價係數。例：只變售價 +10%，成本係數 <code>1</code>、售價係數 <code>1.10</code> → 40.91%；只變售價 −1%，售價係數 <code>0.99</code> → 34.34%。</p>
     </div>
     <p class="note">重點觀念：售價 +5% 不等於毛利率 +5 個百分點，因為成本沒跟著漲，必須用「毛利 ÷ 新售價」重算。售價變動改的是分母（除），成本變動改的是分子（乘）。</p>
   </section>
